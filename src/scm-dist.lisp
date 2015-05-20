@@ -84,6 +84,7 @@
                                                (new-dist scm-dist))
   ;; Update all live release repos in old-dist.
   (dolist (release (installed-live-releases old-dist))
+    (format t "Fetching ~A.~%" (project-name release))
     (update-repo release)))
 
 (defmethod update-release-differences ((old-dist scm-dist)
@@ -115,6 +116,27 @@
     (values (nreverse new)
             (nreverse updated)
             (sort removed #'string< :key #'prefix))))
+
+(defmethod show-update-report ((old-dist scm-dist) (new-dist scm-dist))
+  (multiple-value-bind (new updated removed)
+      (update-release-differences old-dist new-dist)
+    (format t "Changes from ~A ~A to ~A ~A:~%"
+            (name old-dist)
+            (version old-dist)
+            (name new-dist)
+            (version new-dist))
+    (when new
+      (format t "~&  New projects:~%")
+      (format t "~{    ~A~%~}" (mapcar #'prefix new)))
+    (when updated
+      (format t "~%  Updated projects:~%")
+      (loop for (old-release new-release) in updated
+            do (format t "    ~A -> ~A~%"
+                       (prefix old-release)
+                       (raw-prefix old-release))))
+    (when removed
+      (format t "~%  Removed projects:~%")
+      (format t "~{    ~A~%~}" (mapcar #'prefix removed)))))
 
 (defmethod clean ((dist scm-dist))
   (setf dist (find-dist (name dist)))
@@ -151,8 +173,10 @@
       (remove-installed "systems")
       (remove-installed "releases")
       (delete-file-if-exists (relative-to old-dist "releases.txt"))
+      (delete-file-if-exists (relative-to old-dist "scm-releases.txt"))
       (delete-file-if-exists (relative-to old-dist "systems.txt"))
       (delete-file-if-exists (relative-to old-dist "releases.cdb"))
+      (delete-file-if-exists (relative-to old-dist "scm-releases.cdb"))
       (delete-file-if-exists (relative-to old-dist "systems.cdb"))
       (replace-file (ql-dist::local-distinfo-file new-dist)
                     (ql-dist::local-distinfo-file old-dist))

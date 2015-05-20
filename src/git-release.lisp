@@ -75,3 +75,11 @@
                  :prefix (format nil "~A/" (prefix release))
                  :output (local-archive-file release)
                  :treeish (git-ref release))))
+
+(defmethod ql-bundle::unpack-release ((release git-release) target)
+  (let ((*default-pathname-defaults* (truename
+                                      (ensure-directories-exist target)))
+        (archive (ensure-local-archive-file release)))
+    (ql-minitar:unpack-tarball archive :directory "software/")
+;;    (delete-file temp-tar)
+    release))
