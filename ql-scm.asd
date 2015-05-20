@@ -4,7 +4,8 @@
   :description "A Quicklisp extension that can pull from project SCMs directly."
   :version (:read-file-form "version.lisp-expr")
   :serial t
-  :depends-on (#:quicklisp)
+  :depends-on (#:quicklisp
+               (:feature (:not :asdf3) :uiop))
   :author "Eric Timmons <etimmons@mit.edu>"
   :license "MIT"
   :components ((:module "src"
