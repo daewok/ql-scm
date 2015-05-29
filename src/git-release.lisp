@@ -56,10 +56,8 @@
   (let ((metadata-file (install-metadata-file release)))
     (if (probe-file metadata-file)
         (with-open-file (stream metadata-file)
-          (let* ((folder (read-line stream))
-                 (prefix-with-slash (subseq folder
-                                            (1+ (position #\/ folder :from-end t :end (1- (length folder)))))))
-            (subseq prefix-with-slash 0 (1- (length prefix-with-slash)))))
+          (let* ((folder (read-line stream)))
+            (car (last (pathname-directory (pathname folder))))))
         (raw-prefix release))))
 
 (defmethod repo-location (release)
